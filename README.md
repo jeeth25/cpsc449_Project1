@@ -6,5 +6,5 @@ File Handling with Public and Admin Routes
 Group Members:
 
 <li>Jeet Hirakani</li>
-<li>Tejas Patel</li>
+<li>Tejaskumar Patel</li>
 <li>Ashil Shah</li>
