@@ -30,11 +30,36 @@ jwt = JWTManager(app)
 conn = pymysql.connect(
     host='localhost',
     user='root',
-    password="admin",
+    password="admin1234",
     db='web_backend',
     cursorclass=pymysql.cursors.DictCursor
 )
 cur = conn.cursor()
+
+
+@app.route("/")
+def home_page():
+    return render_template("home.html")
+
+
+@app.errorhandler(400)
+def bad_request(e):
+    return jsonify(error=str(e)), 400
+
+
+@app.errorhandler(404)
+def page_not_found(e):
+    return jsonify(error=str(e)), 404
+
+
+@app.errorhandler(401)
+def no_access(e):
+    return jsonify(error=str(e)), 401
+
+
+@app.errorhandler(403)
+def bad_request(e):
+    return jsonify(error=str(e)), 403
 
 
 # Create a route to authenticate your users and return JWTs. The
@@ -85,11 +110,10 @@ def upload_files():
     return jsonify({"msg": "File Uploaded Successfully !"}), 200
 
 
+@app.route("/public")
+def public_route():
+    pass
+
+
 if __name__ == "__main__":
     app.run(debug=True)
-
-
-
-
-
-
