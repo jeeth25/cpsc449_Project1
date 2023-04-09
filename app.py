@@ -62,6 +62,11 @@ def bad_request(e):
     return jsonify(error=str(e)), 403
 
 
+@app.errorhandler(500)
+def error_1(e):
+    return jsonify(error=str(e)), 500
+
+
 # Create a route to authenticate your users and return JWTs. The
 # create_access_token() function is used to actually generate the JWT.
 @app.route("/login", methods=["POST"])
@@ -110,9 +115,14 @@ def upload_files():
     return jsonify({"msg": "File Uploaded Successfully !"}), 200
 
 
-@app.route("/public")
+@app.route("/public",  methods=['GET'])
 def public_route():
-    pass
+    items = [
+        {'item_id': 1, 'item_name': 'Phone', 'item_description': 'desc1', 'barcode': 123, 'price': 300},
+        {'item_id': 2, 'item_name': 'Laptop', 'item_description': 'desc2', 'barcode': 456, 'price': 400},
+        {'item_id': 3, 'item_name': 'Powerbank', 'item_description': 'desc3', 'barcode': 789, 'price': 500}
+    ]
+    return jsonify(items)
 
 
 if __name__ == "__main__":
