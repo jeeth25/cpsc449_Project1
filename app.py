@@ -115,13 +115,17 @@ def upload_files():
     return jsonify({"msg": "File Uploaded Successfully !"}), 200
 
 
-@app.route("/public",  methods=['GET'])
+@app.route("/public", methods=['GET'])
 def public_route():
-    items = [
-        {'item_id': 1, 'item_name': 'Phone', 'item_description': 'desc1', 'barcode': 123, 'price': 300},
-        {'item_id': 2, 'item_name': 'Laptop', 'item_description': 'desc2', 'barcode': 456, 'price': 400},
-        {'item_id': 3, 'item_name': 'Powerbank', 'item_description': 'desc3', 'barcode': 789, 'price': 500}
-    ]
+
+    try:
+        cur.execute('''SELECT * FROM items''')
+    except:
+        return 'error'
+    items = []
+    for row in cur.fetchall():
+        items.append(row)
+    print(items)
     return jsonify(items)
 
 
