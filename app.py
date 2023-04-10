@@ -79,8 +79,6 @@ def error_1(e):
 @app.route("/createuser", methods=["POST"])
 def createuser():
     msg = ''
-    # user_query = '''CREATE TABLE accounts(id int NOT NULL AUTO_INCREMENT primary key, username varchar(50) NOT NULL,
-    # password varchar(255) NOT NULL)'''
     user_query = '''CREATE TABLE accounts(id int NOT NULL AUTO_INCREMENT primary key, username varchar(50) NOT NULL,
                     password varchar(255) NOT NULL, email varchar(100) NOT NULL,
                     organisation varchar(100) NOT NULL,
