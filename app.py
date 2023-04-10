@@ -44,6 +44,7 @@ def home_page():
     return render_template("home.html")
 
 
+# List of required error handlers
 @app.errorhandler(400)
 def bad_request(e):
     return jsonify(error=str(e)), 400
@@ -67,6 +68,36 @@ def bad_request(e):
 @app.errorhandler(500)
 def error_1(e):
     return jsonify(error=str(e)), 500
+
+
+@app.errorhandler(405)
+def error_1(e):
+    return jsonify(error=str(e)), 405
+
+
+# creates a user with their credentials
+@app.route("/createuser", methods=["POST"])
+def createuser():
+    msg = ''
+    # user_query = '''CREATE TABLE accounts(id int NOT NULL AUTO_INCREMENT primary key, username varchar(50) NOT NULL,
+    # password varchar(255) NOT NULL)'''
+    user_query = '''CREATE TABLE accounts(id int NOT NULL AUTO_INCREMENT primary key, username varchar(50) NOT NULL,
+                    password varchar(255) NOT NULL, email varchar(100) NOT NULL,
+                    organisation varchar(100) NOT NULL,
+                    address varchar (100) NOT NULL,
+                    city varchar (100) NOT NULL,
+                    state varchar (100) NOT NULL,
+                    country varchar (100) NOT NULL,
+                    postalcode varchar(100) NOT NULL)'''
+    cur.execute(user_query)
+    credentials = [
+        ('1', 'user1', '1234', 'test@test.com', 'test1', 'addtest', 'testc', 'stest', 'test2', '12345'),
+        ('2', 'user2', '5678', 'test1@test.com', 'test2', 'addtest1', 'testc1', 'stest1', 'test3', '12345'),
+        ('3', 'admin', 'admin', 'test1@test.com', 'test3', 'addtest2', 'testc2', 'stest2', 'test4', '12345')
+    ]
+    insert_query = "INSERT INTO accounts values(%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)"
+    cur.executemany(insert_query, credentials)
+    return jsonify({"msg": "User has been created!"})
 
 
 # Create a route to authenticate your users and return JWTs. The
@@ -102,7 +133,6 @@ def protected():
     return jsonify(logged_in_as=current_user), 200
 
 
-
 def role_required(role_name):
     def decorator(func):
         @wraps(func)
@@ -110,20 +140,46 @@ def role_required(role_name):
             print("  ========= IN DECORATOR ===================", args, kwargs, request.args)
             username = request.json.get("username", None)
             if username != 'admin':
-                abort(401) # not authorized
+                abort(401)  # not authorized
             return func(*args, **kwargs)
+
         return authorize
+
     return decorator
+
 
 @app.route('/admin-protected', methods=["POST"])
 @role_required('admin')
 def admin_view():
-    " this view is for admins only "\
+    # " this view is for admins only " \
+    cur.execute('''SELECT * FROM accounts''')
 
+    user_accs = []
+    for accs in cur.fetchall():
+        user_accs.append(accs)
+    return jsonify(accs)
     return jsonify({"msg": "Admin View Accessed !"}), 201
 
 
+# This is for inserting data into the database, which will be publicly viewable
+@app.route("/insertdata", methods=['POST'])
+def insertdata():
+    try:
+        sql_statement = '''CREATE TABLE OBJECTS(item_id integer not null auto_increment primary key, item_name varchar(20), item_description text, barcode text, price integer)'''
+        cur.execute(sql_statement)
+    except:
+        return "Table already exists!"
+    objects = [
+        ('1', 'Phone', 'desc1', '123', '300'),
+        ('2', 'Laptop', 'desc2', '456', '400'),
+        ('3', 'Power bank', 'desc3', "789", '500')
+    ]
+    insert_query = "INSERT INTO OBJECTS values(%s,%s,%s,%s,%s)"
+    cur.executemany(insert_query, objects)
+    return jsonify("Table has been created!!")
 
+
+# This is for uploading the file and checking whether they are valid or not
 @app.route('/uploadfile', methods=['POST'])
 @jwt_required()
 def upload_files():
@@ -139,18 +195,17 @@ def upload_files():
     return jsonify({"msg": "File Uploaded Successfully !"}), 200
 
 
+# This route gives a list of items. No authentication needed.
 @app.route("/public", methods=['GET'])
 def public_route():
-
     try:
-        cur.execute('''SELECT * FROM accounts''')
+        cur.execute('''SELECT * FROM objects''')
     except:
         return 'error'
-    items = []
+    objects = []
     for row in cur.fetchall():
-        items.append(row)
-    print(items)
-    return jsonify(items)
+        objects.append(row)
+    return jsonify(objects)
 
 
 if __name__ == "__main__":
