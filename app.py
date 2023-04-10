@@ -1,4 +1,6 @@
 import os
+from functools import wraps
+
 from flask import Flask, render_template, request, \
     redirect, url_for, session, abort, jsonify, request
 import pymysql
@@ -30,7 +32,7 @@ jwt = JWTManager(app)
 conn = pymysql.connect(
     host='localhost',
     user='root',
-    password="admin1234",
+    password="admin",
     db='web_backend',
     cursorclass=pymysql.cursors.DictCursor
 )
@@ -100,6 +102,28 @@ def protected():
     return jsonify(logged_in_as=current_user), 200
 
 
+
+def role_required(role_name):
+    def decorator(func):
+        @wraps(func)
+        def authorize(*args, **kwargs):
+            print("  ========= IN DECORATOR ===================", args, kwargs, request.args)
+            username = request.json.get("username", None)
+            if username != 'admin':
+                abort(401) # not authorized
+            return func(*args, **kwargs)
+        return authorize
+    return decorator
+
+@app.route('/admin-protected', methods=["POST"])
+@role_required('admin')
+def admin_view():
+    " this view is for admins only "\
+
+    return jsonify({"msg": "Admin View Accessed !"}), 201
+
+
+
 @app.route('/uploadfile', methods=['POST'])
 @jwt_required()
 def upload_files():
@@ -119,7 +143,7 @@ def upload_files():
 def public_route():
 
     try:
-        cur.execute('''SELECT * FROM items''')
+        cur.execute('''SELECT * FROM accounts''')
     except:
         return 'error'
     items = []
