@@ -158,7 +158,8 @@ def admin_view():
     return jsonify({"msg": "Admin View Accessed !"}), 201
 
 
-# This is for inserting data into the database, which will be publicly viewable
+# This is for inserting data into the database, which will be publicly viewable.
+# Needs the role of admin
 @app.route("/insertdata", methods=['POST'])
 @role_required('admin')
 def insertdata():
@@ -178,6 +179,7 @@ def insertdata():
 
 
 # This is for uploading the file and checking whether they are valid or not
+# Needs jwt token
 @app.route('/uploadfile', methods=['POST'])
 @jwt_required()
 def upload_files():
