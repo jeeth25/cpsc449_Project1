@@ -32,7 +32,7 @@ jwt = JWTManager(app)
 conn = pymysql.connect(
     host='localhost',
     user='root',
-    password="admin",
+    password="admin1234",
     db='web_backend',
     cursorclass=pymysql.cursors.DictCursor
 )
@@ -80,8 +80,7 @@ def error_1(e):
 def createuser():
     msg = ''
     user_query = '''CREATE TABLE accounts(id int NOT NULL AUTO_INCREMENT primary key, username varchar(50) NOT NULL,
-                    password varchar(255) NOT NULL, email varchar(100) NOT NULL,
-                    organisation varchar(100) NOT NULL,
+                    password varchar(255) NOT NULL, email varchar(100) NOT NULL, organisation varchar(100) NOT NULL,
                     address varchar (100) NOT NULL,
                     city varchar (100) NOT NULL,
                     state varchar (100) NOT NULL,
@@ -91,9 +90,9 @@ def createuser():
     credentials = [
         ('1', 'user1', '1234', 'test@test.com', 'test1', 'addtest', 'testc', 'stest', 'test2', '12345'),
         ('2', 'user2', '5678', 'test1@test.com', 'test2', 'addtest1', 'testc1', 'stest1', 'test3', '12345'),
-        ('3', 'admin', 'admin', 'test1@test.com', 'test3', 'addtest2', 'testc2', 'stest2', 'test4', '12345')
+        ('3', 'admin', 'admin', 'test2@test.com', 'test3', 'addtest2', 'testc2', 'stest2', 'test4', '12345')
     ]
-    insert_query = "INSERT INTO accounts values(%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)"
+    insert_query = '''INSERT INTO accounts values(%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)'''
     cur.executemany(insert_query, credentials)
     return jsonify({"msg": "User has been created!"})
 
@@ -135,7 +134,7 @@ def role_required(role_name):
     def decorator(func):
         @wraps(func)
         def authorize(*args, **kwargs):
-            print("  ========= IN DECORATOR ===================", args, kwargs, request.args)
+            # print("  ========= IN DECORATOR ===================", args, kwargs, request.args)
             username = request.json.get("username", None)
             if username != 'admin':
                 abort(401)  # not authorized
@@ -161,6 +160,7 @@ def admin_view():
 
 # This is for inserting data into the database, which will be publicly viewable
 @app.route("/insertdata", methods=['POST'])
+@role_required('admin')
 def insertdata():
     try:
         sql_statement = '''CREATE TABLE OBJECTS(item_id integer not null auto_increment primary key, item_name varchar(20), item_description text, barcode text, price integer)'''
