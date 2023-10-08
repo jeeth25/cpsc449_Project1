@@ -25,7 +25,7 @@ To run the project:
 
 `conda install pip`
 
-3. Run the command to install the required commands.
+3. Run the command to install the required packages.
 
 `pip install -r requirements.txt`
 
